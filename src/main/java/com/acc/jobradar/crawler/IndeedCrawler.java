@@ -4,6 +4,7 @@ import jakarta.annotation.PostConstruct;
 import lombok.AllArgsConstructor;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -15,46 +16,46 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
 @AllArgsConstructor
 @Service
 public class IndeedCrawler {
-    private static final String URL = "https://ca.indeed.com/";
+    private static final String URL = "https://ca.indeed.com/jobs?";
     private final ChromeDriver chromeDriver;
 
     public void getJobPosting(String jobTitle,String location) throws InterruptedException {
-        chromeDriver.get(URL);
-
-        Thread.sleep(2000);
-
-        WebElement jobTitleInput = chromeDriver.findElement(By.id("text-input-what"));
-        WebElement locationInput = chromeDriver.findElement(By.id("text-input-where"));
-
-        jobTitleInput.sendKeys(jobTitle);
-
-        locationInput.sendKeys(Keys.CONTROL, Keys.chord("a"));
-        for (int i = 0; i < 11; i++) {
-            locationInput.sendKeys(Keys.BACK_SPACE);
-        }
-        locationInput.sendKeys(location);
-
-        WebElement formElement = chromeDriver.findElement(By.id("jobsearch"));
-        WebElement submitButton = formElement.findElement(By.tagName("button"));
-
-        Thread.sleep(3000);
-
-        submitButton.click();
-
-        List<WebElement> jobOpenings = chromeDriver.findElements(By.className("resultContent"));
-
+        chromeDriver.get(URL+"q="+jobTitle+"&l="+location);
         List<String> jobLinks=new ArrayList<>();
 
-        jobOpenings.forEach(jobOpening ->{
-            String jobLink = jobOpening.findElement(By.tagName("a")).getAttribute("href");
-            jobLinks.add(jobLink);
-        });
+        int pages=10;
+
+        do{
+            chromeDriver.manage().timeouts().implicitlyWait(Duration.ofSeconds(5));
+            try{
+                chromeDriver.findElement(By.cssSelector(".css-yi9ndv.e8ju0x51")).click();
+            }catch (NoSuchElementException e){
+                System.out.println("No element");
+            }
+            List<WebElement> jobOpenings = chromeDriver.findElements(By.className("resultContent"));
+            jobOpenings.forEach(jobOpening ->{
+                String jobLink = jobOpening.findElement(By.tagName("a")).getAttribute("href");
+                jobLinks.add(jobLink);
+            });
+            System.out.println(jobLinks.size());
+            List<WebElement> elements = chromeDriver.findElements(By.cssSelector(".css-akkh0a.e8ju0x50"));
+            if(elements.size()==1){
+                elements.get(0).click();
+            }
+            else{
+                elements.get(1).click();
+            }
+            pages--;
+        }while (pages>0);
+
+
 
         // Folder to store HTML files
         String folderPath = "htmlFilesIndeed";
@@ -70,6 +71,8 @@ public class IndeedCrawler {
             chromeDriver.get(jobLink);
             // wait for html to be loaded
             Thread.sleep(5000);
+            System.out.println("Crawling Indeed URL: "+jobLink);
+
 
             // Get the HTML source
             String htmlSource = chromeDriver.getPageSource();

@@ -1,6 +1,5 @@
 package com.acc.jobradar.crawler;
 
-import jakarta.annotation.PostConstruct;
 import lombok.AllArgsConstructor;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -11,6 +10,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,7 +23,7 @@ public class LinkedinCrawler {
     public void getJobPosting(String jobTitle,String location) throws InterruptedException {
         chromeDriver.get(URL);
 
-        Thread.sleep(5000);
+        chromeDriver.manage().timeouts().implicitlyWait(Duration.ofSeconds(5));
 
         WebElement jobTitleInput = chromeDriver.findElement(By.id("job-search-bar-keywords"));
         WebElement locationInput = chromeDriver.findElement(By.id("job-search-bar-location"));
@@ -41,8 +41,11 @@ public class LinkedinCrawler {
         jobOpenings.forEach(jobOpening ->{
             String jobLink = jobOpening.findElement(By.tagName("a")).getAttribute("href");
             System.out.println(jobLink);
-            jobLinks.add(jobLink);
         });
+
+        if(jobOpenings.isEmpty()) {
+            System.out.println("NO job links found");
+        }
 
         // Folder to store HTML files
         String folderPath = "htmlFilesLinkedin";
@@ -57,6 +60,7 @@ public class LinkedinCrawler {
         for (String jobLink : jobLinks) {
             // Navigate to the job link
             Thread.sleep(5000);
+            System.out.println("Crawling Linkedin URL: "+jobLink);
             chromeDriver.get(jobLink);
             Thread.sleep(5000);
 
@@ -85,7 +89,7 @@ public class LinkedinCrawler {
 
     private static String getFileNameFromUrl(String url) {
         // Extract the filename from the URL
-        return url.substring(url.lastIndexOf('/') + 1);
+        return Integer.toHexString(url.hashCode());
     }
 
 }

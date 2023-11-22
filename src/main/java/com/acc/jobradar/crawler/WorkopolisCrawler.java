@@ -10,6 +10,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,15 +30,24 @@ public class WorkopolisCrawler {
 
         chromeDriver.findElement(By.xpath("/html/body/div[1]/div/main/section/div[1]/form/button")).click();
 
-        WebElement jobListDiv = chromeDriver.findElement(By.id("job-list"));
-        List<WebElement> jobOpenings = jobListDiv.findElements(By.tagName("article"));
-
         List<String> jobLinks=new ArrayList<>();
 
-        jobOpenings.forEach(jobOpening ->{
-            String jobLink = jobOpening.findElement(By.tagName("a")).getAttribute("href");
-            jobLinks.add(jobLink);
-        });
+//        Pagination-link Pagination-link--next
+        int pages=10;
+        do{
+            chromeDriver.manage().timeouts().implicitlyWait(Duration.ofSeconds(5));
+            WebElement jobListDiv = chromeDriver.findElement(By.id("job-list"));
+            List<WebElement> jobOpenings = jobListDiv.findElements(By.tagName("article"));
+            jobOpenings.forEach(jobOpening ->{
+                String jobLink = jobOpening.findElement(By.tagName("a")).getAttribute("href");
+                jobLinks.add(jobLink);
+            });
+
+            chromeDriver.findElement(By.cssSelector(".Pagination-link.Pagination-link--next")).click();
+            pages--;
+        }while (pages>0);
+
+
 
         // Folder to store HTML files
         String folderPath = "htmlFilesWorkopolis";
@@ -53,6 +63,7 @@ public class WorkopolisCrawler {
             chromeDriver.get(jobLink);
             // wait for html to be loaded
             Thread.sleep(5000);
+            System.out.println("Crawling Workopolis URL: "+jobLink);
 
             // Get the HTML source
             String htmlSource = chromeDriver.getPageSource();
