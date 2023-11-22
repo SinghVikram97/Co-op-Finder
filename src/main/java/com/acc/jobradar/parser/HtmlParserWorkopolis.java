@@ -1,5 +1,7 @@
 package com.acc.jobradar.parser;
 
+import com.acc.jobradar.constants.StringConstants;
+import com.acc.jobradar.datavalidation.DataValidator;
 import com.acc.jobradar.model.JobPosting;
 import lombok.AllArgsConstructor;
 import org.jsoup.Jsoup;
@@ -28,7 +30,9 @@ public class HtmlParserWorkopolis {
                     try {
                         Document parsedDocument = Jsoup.parse(fileCurrent, "UTF-8", "");
                         JobPosting jobPosting = extractJobDetails(parsedDocument);
-                        jobPostingList.add(jobPosting);
+                        if(DataValidator.validateData(jobPosting)){
+                            jobPostingList.add(jobPosting);
+                        }
                     } catch (IOException exp) {
                         exp.printStackTrace();
                     }
@@ -44,19 +48,19 @@ public class HtmlParserWorkopolis {
     private static JobPosting extractJobDetails(Document parsedHtmlDoc) {
 
         Element jobRoleElement = parsedHtmlDoc.select("div.ViewJobHeaderTitle").first();
-        String jobRole = (jobRoleElement != null) ? jobRoleElement.text() : "Job title not found";
+        String jobRole = (jobRoleElement != null) ? jobRoleElement.text() : StringConstants.JobTitleNotFound;
 
         Element companyNameElement = parsedHtmlDoc.select("div.ViewJobHeaderCompany").first();
-        String companyName = (companyNameElement != null) ? companyNameElement.text().replace("Company Name: ", "") : "Company name not found";
+        String companyName = (companyNameElement != null) ? companyNameElement.text().replace("Company Name: ", "") : StringConstants.CompanyNotFound;
 
         Element companyLocationElement = parsedHtmlDoc.select(".ViewJobHeaderPropertiesLocation").first();
-        String companyLocation = (companyLocationElement != null) ? companyLocationElement.text().trim() : "Location not found";
+        String companyLocation = (companyLocationElement != null) ? companyLocationElement.text().trim() : StringConstants.LocationNotFound;
 
         Element JobDescriptionElement = parsedHtmlDoc.select(".viewjob-description-tab .ViewJobBodyDescription").first();
-        String jobDescription = (JobDescriptionElement != null) ? JobDescriptionElement.text().trim() : "Description not found";
+        String jobDescription = (JobDescriptionElement != null) ? JobDescriptionElement.text().trim() : StringConstants.DescriptionNotFound;
 
         Element websiteLinkElement = parsedHtmlDoc.select("link[rel=canonical]").first();
-        String websiteLink = (websiteLinkElement != null) ? websiteLinkElement.attr("href") : "Link not found";
+        String websiteLink = (websiteLinkElement != null) ? websiteLinkElement.attr("href") : StringConstants.LinkNotFound;
 
         // Return all the extracted elements to the 'WorkopolisJobData' class
         return new JobPosting(jobRole, companyName, companyLocation, jobDescription, websiteLink);
