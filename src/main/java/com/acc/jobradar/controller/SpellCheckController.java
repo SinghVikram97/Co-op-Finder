@@ -1,5 +1,6 @@
 package com.acc.jobradar.controller;
 
+import com.acc.jobradar.datavalidation.SearchQueryValidator;
 import com.acc.jobradar.spellchecker.SpellCheckService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -14,7 +15,11 @@ public class SpellCheckController {
     private final SpellCheckService spellCheckService;
     @GetMapping("/spellcheck/{userInput}")
     public ResponseEntity<String> suggestWords(@PathVariable String userInput) {
-        String correctedString = spellCheckService.spellCheck(userInput);
-        return ResponseEntity.ok(correctedString);
+        if(SearchQueryValidator.validateString(userInput))
+        {
+            String correctedString = spellCheckService.spellCheck(userInput);
+            return ResponseEntity.ok(correctedString);
+        }
+        return ResponseEntity.ok(userInput);
     }
 }
