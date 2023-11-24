@@ -2,8 +2,11 @@ package com.acc.jobradar.crawler;
 
 import lombok.AllArgsConstructor;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.interactions.Actions;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedWriter;
@@ -34,16 +37,36 @@ public class LinkedinCrawler {
 
         chromeDriver.findElement(By.xpath("/html/body/div[1]/header/nav/section/section[2]/form/button")).click();
 
-        List<WebElement> jobOpenings = chromeDriver.findElements(By.className("base-search-card--link"));
-
+        int pages = 10;
         List<String> jobLinks=new ArrayList<>();
 
-        jobOpenings.forEach(jobOpening ->{
-            String jobLink = jobOpening.findElement(By.tagName("a")).getAttribute("href");
-            System.out.println(jobLink);
-        });
+        do {
+            chromeDriver.manage().window().maximize();
 
-        if(jobOpenings.isEmpty()) {
+            for (int i = 0; i < 10; i++) {
+                JavascriptExecutor js = chromeDriver;
+                js.executeScript("window.scrollBy(0,5000)");
+                js.executeScript("window.scrollBy(0,-2000)");
+                js.executeScript("window.scrollBy(0,5000)");
+                Thread.sleep(5000);
+            }
+
+
+            List<WebElement> jobOpenings = chromeDriver.findElements(By.className("base-search-card--link"));
+
+            jobOpenings.forEach(jobOpening ->{
+                String jobLink = jobOpening.findElement(By.tagName("a")).getAttribute("href");
+                jobLinks.add(jobLink);
+            });
+
+            pages--;
+
+            chromeDriver.findElement(By.className("infinite-scroller__show-more-button")).click();
+
+        }while(pages>0);
+
+
+        if(jobLinks.isEmpty()) {
             System.out.println("NO job links found");
         }
 

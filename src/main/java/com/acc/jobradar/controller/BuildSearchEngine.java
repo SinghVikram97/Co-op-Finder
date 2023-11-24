@@ -1,5 +1,6 @@
 package com.acc.jobradar.controller;
 
+import com.acc.jobradar.autocomplete.AutoComplete;
 import com.acc.jobradar.database.Database;
 import com.acc.jobradar.invertedindex.InvertedIndex;
 import com.acc.jobradar.model.JobPosting;
@@ -22,6 +23,7 @@ public class BuildSearchEngine {
     private Database database;
     private InvertedIndex invertedIndex;
     private VocabularyBuilder vocabularyBuilder;
+    private AutoComplete autoComplete;
 
     @GetMapping("/buildsearchengine")
     public String buildSearchEngine() {
@@ -43,6 +45,8 @@ public class BuildSearchEngine {
         database.addJobPostings(jobPostingsFromWorkopolis);
 
         invertedIndex.buildIndex(database.getJobPostings());
+
+        autoComplete.buildAutoComplete(database.getJobPostings());
         return "Built vocabulary and inverted index";
     }
 }
