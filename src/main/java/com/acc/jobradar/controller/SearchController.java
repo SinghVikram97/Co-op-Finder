@@ -1,17 +1,16 @@
 package com.acc.jobradar.controller;
 
 import com.acc.jobradar.database.Database;
+import com.acc.jobradar.frequencycounter.FrequencyCounter;
 import com.acc.jobradar.invertedindex.InvertedIndex;
 import com.acc.jobradar.model.JobPosting;
+import com.acc.jobradar.pageranking.PageRanking;
 import com.acc.jobradar.service.SearchService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -21,6 +20,8 @@ public class SearchController {
     private final SearchService searchService;
     private final InvertedIndex invertedIndex;
     private final Database database;
+    private final FrequencyCounter frequencyCounter;
+    private final PageRanking pageRanking;
 
     @GetMapping("/suggest/{userInput}")
     public ResponseEntity<List<String>> suggestWords(@PathVariable String userInput) {
@@ -49,4 +50,16 @@ public class SearchController {
     public ResponseEntity<Set<String>> getVocab(){
         return ResponseEntity.ok(database.getVocabulary());
     }
+
+    @GetMapping("/frequencyCount/{userInput}")
+    public ResponseEntity<Map<String, Integer>> frequencyCount(@PathVariable String userInput) {
+        Map<String, Integer> wordFrequency = frequencyCounter.getWordFrequency(userInput);
+        return ResponseEntity.ok(wordFrequency);
+    }
+    @GetMapping("/pageRanking/{userInput}")
+    public ResponseEntity<List<String>> pageRank(@PathVariable String userInput) {
+        List<String> pageRanks = pageRanking.getPageRanks(userInput);
+        return ResponseEntity.ok(pageRanks);
+    }
+
 }
