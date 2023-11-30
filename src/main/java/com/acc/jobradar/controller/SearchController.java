@@ -7,6 +7,7 @@ import com.acc.jobradar.model.JobPosting;
 import com.acc.jobradar.pageranking.PageRanking;
 import com.acc.jobradar.searchfrequency.SearchFrequencyTracker;
 import com.acc.jobradar.service.SearchService;
+import com.acc.jobradar.validation.SearchQueryValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -33,6 +34,9 @@ public class SearchController {
 
     @GetMapping("/jobposting/{userInput}")
     public ResponseEntity<List<JobPosting>> searchDocuments(@PathVariable String userInput) {
+        if(!SearchQueryValidator.validateString(userInput)){
+            return ResponseEntity.badRequest().build();
+        }
         searchFrequencyTracker.recordSearch(userInput);
         List<JobPosting> jobPostings = searchService.searchJobPosting(userInput);
         return ResponseEntity.ok(jobPostings);
