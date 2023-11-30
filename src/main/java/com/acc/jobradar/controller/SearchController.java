@@ -5,6 +5,7 @@ import com.acc.jobradar.frequencycounter.FrequencyCounter;
 import com.acc.jobradar.invertedindex.InvertedIndex;
 import com.acc.jobradar.model.JobPosting;
 import com.acc.jobradar.pageranking.PageRanking;
+import com.acc.jobradar.searchfrequency.SearchFrequencyTracker;
 import com.acc.jobradar.service.SearchService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +23,7 @@ public class SearchController {
     private final Database database;
     private final FrequencyCounter frequencyCounter;
     private final PageRanking pageRanking;
+    private final SearchFrequencyTracker searchFrequencyTracker;
 
     @GetMapping("/suggest/{userInput}")
     public ResponseEntity<List<String>> suggestWords(@PathVariable String userInput) {
@@ -31,6 +33,7 @@ public class SearchController {
 
     @GetMapping("/jobposting/{userInput}")
     public ResponseEntity<List<JobPosting>> searchDocuments(@PathVariable String userInput) {
+        searchFrequencyTracker.recordSearch(userInput);
         List<JobPosting> jobPostings = searchService.searchJobPosting(userInput);
         return ResponseEntity.ok(jobPostings);
     }
