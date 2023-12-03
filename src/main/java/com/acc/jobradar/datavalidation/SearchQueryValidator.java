@@ -35,7 +35,7 @@ public class SearchQueryValidator {
             return false;
         }
 
-        Pattern pattern = Pattern.compile("^[a-zA-Z0-9\\s]+$");
+        Pattern pattern = Pattern.compile("^[a-zA-Z0-9-,\\s]+$");
         Matcher matcher = pattern.matcher(searchQuery);
 
         return matcher.matches();
