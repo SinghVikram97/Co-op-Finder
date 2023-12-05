@@ -1,6 +1,10 @@
 package com.acc.jobradar.database;
 
+import com.acc.jobradar.filehandler.FileHandler;
 import com.acc.jobradar.model.JobPosting;
+import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -13,12 +17,24 @@ import java.util.Optional;
 import java.util.Set;
 
 @Service
+@RequiredArgsConstructor
 public class Database {
+    private final Logger logger = LoggerFactory.getLogger(Database.class);
     private static final ArrayList<JobPosting> jobPostingList = new ArrayList<>();
     private static final Set<String> vocabularySet = new HashSet<>();
 
     private final Map<String, Integer> wordFrequencyMap = new HashMap<>();
     private final Map<String, Integer> termFrequencyMap = new HashMap<>();
+
+    private static List<String> commonEnglishStopWords = new ArrayList<>();
+
+    {
+        try{
+            commonEnglishStopWords = FileHandler.getFileContents("common-stop-words.txt");
+        }catch (Exception exception) {
+            logger.error("Error while getting stop words cause:{} message:{}", exception.getCause(), exception.getMessage());
+        }
+    }
 
     public void addJobPostings(List<JobPosting> jobPostings) {
         jobPostingList.addAll(jobPostings);
@@ -55,5 +71,9 @@ public class Database {
 
     public Map<String, Integer> getWordFrequencyMap() {
         return Collections.unmodifiableMap(wordFrequencyMap);
+    }
+
+    public List<String> getCommonEnglishStopWords() {
+        return commonEnglishStopWords;
     }
 }

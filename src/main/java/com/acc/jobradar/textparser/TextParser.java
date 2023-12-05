@@ -1,6 +1,7 @@
 package com.acc.jobradar.textparser;
 
-import com.acc.jobradar.filehandler.FileHandler;
+import com.acc.jobradar.constants.RegexConstants;
+import com.acc.jobradar.database.Database;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -11,15 +12,14 @@ import java.util.stream.Collectors;
 @Service
 @AllArgsConstructor
 public class TextParser {
-    private final FileHandler fileHandler;
+    private final Database database;
     public List<String> extractWords(String input) {
-        String[] words = input.replaceAll("[^a-zA-Z ]", "").toLowerCase().split("\\s+");
+        String[] words = input.replaceAll(RegexConstants.REGEX_NON_ALPHABETS, "").toLowerCase().split(RegexConstants.SPACE_REGEX);
         return removeCommonEnglishStopWords(Arrays.stream(words).toList());
     }
 
     public List<String> removeCommonEnglishStopWords(List<String> wordList){
-        List<String> commonEnglishStopWords = fileHandler.getFileContents("common-stop-words.txt");
-        return wordList.stream().filter(o -> !commonEnglishStopWords.contains(o)).collect(Collectors.toList());
+        return wordList.stream().filter(o -> !database.getCommonEnglishStopWords().contains(o)).collect(Collectors.toList());
     }
 
 

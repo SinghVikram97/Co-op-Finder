@@ -1,30 +1,26 @@
 package com.acc.jobradar.autocomplete;
 
+// Necessary Imports
+import com.acc.jobradar.constants.RegexConstants;
 import com.acc.jobradar.model.JobPosting;
 import com.acc.jobradar.textparser.TextParser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
-class TrieNode {
-    HashMap<Character, TrieNode> children;
-    boolean isEndOfWord;
+import static com.acc.jobradar.constants.RegexConstants.SPACE_REGEX;
 
-    public TrieNode() {
-        children = new HashMap<>();
-        isEndOfWord = false;
-    }
-}
-
+// AutoComplete Service class
 @Service
 @RequiredArgsConstructor
 public class AutoComplete {
-    TrieNode root = new TrieNode();
+    private final TrieNode autoCompleteRoot;
+    // To extract words, TextParser dependency
     private final TextParser textParser;
 
+    // Building the Trie with all the job postings information
     public void buildAutoComplete(List<JobPosting> jobPostings) {
         for (JobPosting jobPosting : jobPostings) {
             insertWord(jobPosting.getJobTitle());
@@ -34,11 +30,12 @@ public class AutoComplete {
         }
     }
 
+    // Getting the word suggestions on the basis of the input prefix
     public List<String> suggestWords(String prefix) {
         String lowerCasePrefix = prefix.toLowerCase();
 
         // Split the input into words and consider the last word as the new prefix
-        String[] splitWords = lowerCasePrefix.split("\\s+");
+        String[] splitWords = lowerCasePrefix.split(SPACE_REGEX);
 
         // Extracting the existing words to append to the word completion output
         StringBuilder existingWords = new StringBuilder();
@@ -51,6 +48,7 @@ public class AutoComplete {
 
         List<String> allCompletionsList = getallwordsWithPrefix(latestPrefix, Integer.MAX_VALUE);
 
+        // Preparing the suggestions list
         List<String> wordSuggestions = new ArrayList<>();
         for (String completionOutput : allCompletionsList) {
             wordSuggestions.add(existingWords + completionOutput);
@@ -59,9 +57,10 @@ public class AutoComplete {
         return wordSuggestions;
     }
 
+    // Getting all words with input prefix and maximum edit distance
     private List<String> getallwordsWithPrefix (String prefix, int editDistancemax) {
         List<String> result = new ArrayList<>();
-        TrieNode currentNode = root;
+        TrieNode currentNode = autoCompleteRoot;
 
         for (char character : prefix.toCharArray()) {
             character = Character.toLowerCase(character); // Convert to lowercase
@@ -75,6 +74,7 @@ public class AutoComplete {
         return result;
     }
 
+    // To insert word into the Trie
     private void insertWord(String text) {
         List<String> words = textParser.extractWords(text);
         for (String word : words) {
@@ -82,8 +82,9 @@ public class AutoComplete {
         }
     }
 
+    // Insert operation in Trie
     private void insert(String wordString) {
-        TrieNode currNode = root;                          // Current Node to root
+        TrieNode currNode = autoCompleteRoot;                          // Current Node to root
         char[] strToArray = wordString.toCharArray();      // Converting word string to a character Array
 
         for (char chacter : strToArray) {
@@ -91,9 +92,10 @@ public class AutoComplete {
             currNode.children.putIfAbsent(chacter, new TrieNode());
             currNode = currNode.children.get(chacter);
         }
-        currNode.isEndOfWord = true;
+        currNode.isEndOfWord = true;    // Flag the end of the word
     }
 
+    // to get all words from a given Trie node recursively with a specified prefix and edit distance
     private void getAllWordsFromNode(TrieNode currNode, String currPrefix, List<String> res, int editDistanceMax) {
         // checking if current node is the end og the word,
         if (currNode.isEndOfWord) {

@@ -15,9 +15,6 @@ import java.util.Optional;
 public class SearchService {
     private final PageRanking pageRanking;
     private final Database database;
-    public List<String> getSuggestions(String userInput) {
-        return List.of("Software","Software Engineer","Software Developer","Software Engineer Intern");
-    }
 
     public List<JobPosting> searchJobPosting(String userInput) {
         // Returns list of jobIds sorted by ranks
