@@ -1,5 +1,7 @@
 package com.acc.jobradar.parser;
 
+import com.acc.jobradar.constants.StringConstants;
+import com.acc.jobradar.datavalidator.DataValidator;
 import com.acc.jobradar.model.JobPosting;
 import lombok.AllArgsConstructor;
 // Jsoup imports
@@ -37,8 +39,12 @@ public class HtmlParserWorkopolis {
                         // Now we need to extract the data from the document parsed (HTML document)
                         JobPosting jobPosting = extractJobDetails(parsedDocument);
 
-                        // The extracted data is added to the jobPostingList
-                        jobPostingList.add(jobPosting);
+                        if(DataValidator.validateJobPosting(jobPosting)) {
+                            // Added the extracted data to the jobPostingList
+                            jobPostingList.add(jobPosting);
+                        }else{
+                            System.out.println("Job Posting is invalid, discarding it");
+                        }
                     } catch (IOException exp) {
                         // Handling Exception
                         exp.printStackTrace();
@@ -57,23 +63,23 @@ public class HtmlParserWorkopolis {
     private static JobPosting extractJobDetails(Document parsedHtmlDoc) {
         // To extract "Job Role" data from the HTML file and handling null data
         Element jobRoleElement = parsedHtmlDoc.select("div.ViewJobHeaderTitle").first();
-        String jobRole = (jobRoleElement != null) ? jobRoleElement.text() : "Job title not found";
+        String jobRole = (jobRoleElement != null) ? jobRoleElement.text() : StringConstants.JobTitleNotFound;
 
         // To extract "Company name" data from the HTML file and handling null data
         Element companyNameElement = parsedHtmlDoc.select("div.ViewJobHeaderCompany").first();
-        String companyName = (companyNameElement != null) ? companyNameElement.text().replace("Company Name: ", "") : "Company name not found";
+        String companyName = (companyNameElement != null) ? companyNameElement.text().replace("Company Name: ", "") : StringConstants.CompanyNotFound;
 
         // To extract "Company Location" data from the HTML file and handling null data
         Element companyLocationElement = parsedHtmlDoc.select(".ViewJobHeaderPropertiesLocation").first();
-        String companyLocation = (companyLocationElement != null) ? companyLocationElement.text().trim() : "Location not found";
+        String companyLocation = (companyLocationElement != null) ? companyLocationElement.text().trim() : StringConstants.LocationNotFound;
 
         // To extract "Job Description" data from the HTML file and handling null data
         Element JobDescriptionElement = parsedHtmlDoc.select(".viewjob-description-tab .ViewJobBodyDescription").first();
-        String jobDescription = (JobDescriptionElement != null) ? JobDescriptionElement.text().trim() : "Description not found";
+        String jobDescription = (JobDescriptionElement != null) ? JobDescriptionElement.text().trim() : StringConstants.DescriptionNotFound;
 
         // To extract "Website URL" data from the HTML file and handling null data
         Element websiteLinkElement = parsedHtmlDoc.select("link[rel=canonical]").first();
-        String websiteLink = (websiteLinkElement != null) ? websiteLinkElement.attr("href") : "Link not found";
+        String websiteLink = (websiteLinkElement != null) ? websiteLinkElement.attr("href") : StringConstants.LinkNotFound;
 
         // Return all the extracted elements to the 'WorkopolisJobData' class
         return new JobPosting(jobRole, companyName, companyLocation, jobDescription, websiteLink);
