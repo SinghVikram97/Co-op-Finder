@@ -5,32 +5,48 @@ import org.springframework.stereotype.Service;
 @Service
 public class EditDistance {
 
-    // Helper function to calculate minimum of three values
-    public static int min(int a, int b, int c) {
-        return Math.min(Math.min(a, b), c);
+    // Helper function to calculate the min of three values
+    public static int calculateMinimum(int one, int two, int three) {
+        return Math.min(Math.min(one, two), three);
     }
 
-    // Calculate the edit distance between two words using dynamic programming
-    public int calculateEditDistance(String word1, String word2) {
-        int m = word1.length();
-        int n = word2.length();
+    /**
+     * Calculate the edit distance of two strings using DP
+     *
+     *  @param   sourceWord firstWord
+     *  @param   targetWord secondword
+     *  @return  The editDistance of the two words
+     */
+    public int calculateEditDistance (String sourceWord, String targetWord) {
+        int sourceLength = sourceWord.length();
+        int targetLength = targetWord.length();
 
-        int[][] dp = new int[m + 1][n + 1];
+        // Create a 2D array to store the editDistances
+        int[][] editDistanceDPArray = new int[sourceLength + 1][targetLength + 1];
 
-        for (int i = 0; i <= m; i++) {
-            for (int j = 0; j <= n; j++) {
-                if (i == 0) {
-                    dp[i][j] = j;
-                } else if (j == 0) {
-                    dp[i][j] = i;
-                } else if (word1.charAt(i - 1) == word2.charAt(j - 1)) {
-                    dp[i][j] = dp[i - 1][j - 1];
+        // Initialize the first row and column of the array
+        for (int iChar = 0; iChar <= sourceLength; iChar++) {
+            for (int jChar = 0; jChar <= targetLength; jChar++) {
+                if (iChar == 0) {
+                    // If the source word is empty then the dist is the len of the original word
+                    editDistanceDPArray[iChar][jChar] = jChar;
+                } else if (jChar == 0) {
+                    // If the target word is empty then the dist is the len of the original word
+                    editDistanceDPArray[iChar][jChar] = iChar;
+                } else if (sourceWord.charAt(iChar - 1) == targetWord.charAt(jChar - 1)) {
+
+                    editDistanceDPArray[iChar][jChar] = editDistanceDPArray[iChar - 1][jChar - 1];
                 } else {
-                    dp[i][j] = 1 + min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
+                    editDistanceDPArray[iChar][jChar] = 1 + calculateMinimum(
+                            editDistanceDPArray[iChar - 1][jChar],
+                            editDistanceDPArray[iChar][jChar - 1],
+                            editDistanceDPArray[iChar - 1][jChar - 1]
+                    );
                 }
             }
         }
-        return dp[m][n];
-    }
 
+        // The final element in the array contains the edit distance between the two words
+        return editDistanceDPArray[sourceLength][targetLength];
+    }
 }

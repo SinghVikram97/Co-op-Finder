@@ -7,25 +7,38 @@ import java.util.Set;
 
 @Service
 public class JaccardSimilarity {
-    // Calculate Jaccard Similarity between two words
-    public double calculateJaccardSimilarity(String word1, String word2) {
-        Set<Character> set1 = new HashSet<>();
-        Set<Character> set2 = new HashSet<>();
 
-        for (char c : word1.toCharArray()) {
-            set1.add(c);
+    /**
+     * Calculate Jaccard Similarity between two strings.
+     *
+     * @param stringOne The first string
+     * @param stringTwo The second string
+     * @return The Jaccard Similarity between the two strings
+     */
+    public double calculateJaccardSimilarity(String stringOne, String stringTwo) {
+        // Create sets to store unique characters from each string
+        Set<Character> setOne = new HashSet<>();
+        Set<Character> setTwo = new HashSet<>();
+
+        // Populate sets with characters from the first string
+        for (char c : stringOne.toCharArray()) {
+            setOne.add(c);
         }
 
-        for (char c : word2.toCharArray()) {
-            set2.add(c);
+        // Populate sets with characters from the second string
+        for (char chr : stringTwo.toCharArray()) {
+            setTwo.add(chr);
         }
 
-        Set<Character> intersection = new HashSet<>(set1);
-        intersection.retainAll(set2);
+        // Calculate the intersection of the two sets
+        Set<Character> intersectionOfBoth = new HashSet<>(setOne);
+        intersectionOfBoth.retainAll(setTwo);
 
-        Set<Character> union = new HashSet<>(set1);
-        union.addAll(set2);
+        // Calculate the union of the two sets
+        Set<Character> unionOfBoth = new HashSet<>(setOne);
+        unionOfBoth.addAll(setTwo);
 
-        return (double) intersection.size() / union.size();
+        // Calculate and return the Jaccard Similarity
+        return (double) intersectionOfBoth.size() / unionOfBoth.size();
     }
 }

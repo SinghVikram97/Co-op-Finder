@@ -64,6 +64,7 @@ public class BuildSearchEngine {
         autoComplete.buildAutoComplete(database.getJobPostings());
         logger.info("Finished building autocomplete data structure from job postings");
 
+        logger.info("Search Engine Built and Updated");
         return "Search Engine built and updated";
     }
 }
