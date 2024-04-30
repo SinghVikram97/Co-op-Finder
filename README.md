@@ -1,3 +1,2 @@
-# JOB RADAR
-A search engine which crawls job boards and shows job posting in a single place.
-Part of COMP-8547 Advanced Computing Concepts coursework
+# Co-op Finder
+A search engine which crawls job boards and shows Co-op jobs postings in a single place.
